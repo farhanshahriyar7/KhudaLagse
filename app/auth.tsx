@@ -94,8 +94,9 @@ export default function AuthScreen() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
-    } catch {
-      Alert.alert("Error", "Authentication failed. Please try again.");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed. Please try again.";
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -235,8 +236,8 @@ export default function AuthScreen() {
               {isLoading
                 ? "Please wait..."
                 : isSignUp
-                ? "Create Account"
-                : "Sign In"}
+                  ? "Create Account"
+                  : "Sign In"}
             </Text>
           </TouchableOpacity>
 
