@@ -1,4 +1,4 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRouter, useRootNavigationState } from "expo-router";
 import { Camera, LogOut, ChevronRight, Lock, FileText, Upload } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -23,14 +23,24 @@ import { supabase } from "@/services/supabase";
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { user, signOut } = useAuth();
+    const rootNavigationState = useRootNavigationState();
+    const { user, signOut, isLoading } = useAuth();
 
     // Protect the route
     React.useEffect(() => {
-        if (!user) {
+        const isNavigationReady = rootNavigationState?.key;
+        if (isNavigationReady && !isLoading && !user) {
             router.replace("/auth");
         }
-    }, [user]);
+    }, [user, isLoading, rootNavigationState]);
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.light.background }}>
+                <ActivityIndicator size="large" color={Colors.light.primary} />
+            </View>
+        );
+    }
 
     if (!user) return null;
 
@@ -76,27 +86,48 @@ export default function ProfileScreen() {
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.5,
-            base64: true,
         });
 
-        if (!result.canceled && result.assets[0].base64) {
+        if (!result.canceled && result.assets[0].uri) {
             setIsUploading(true);
             try {
-                // NOTE: In a real production app, upload to Supabase Storage here.
-                // For this demo/beta without storage setup, we'll store the base64 data URL directly in metadata.
-                // This has size limits (usually < 4MB metadata limit), but works for small avatars.
-                const imageUri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+                const uri = result.assets[0].uri;
 
-                const { error } = await supabase.auth.updateUser({
-                    data: { image: imageUri }
+                // 1. Convert URI to Blob
+                const response = await fetch(uri);
+                const blob = await response.blob();
+
+                // 2. Define path (userId/timestamp.png)
+                const fileExt = uri.split('.').pop()?.toLowerCase() || 'jpeg';
+                const path = `${user?.id}/${Date.now()}.${fileExt}`;
+
+                // 3. Upload to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(path, blob, {
+                        contentType: `image/${fileExt}`,
+                        upsert: true,
+                    });
+
+                if (uploadError) throw uploadError;
+
+                // 4. Get Public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(path);
+
+                // 5. Update User Profile
+                const { error: updateError } = await supabase.auth.updateUser({
+                    data: { image: publicUrl }
                 });
 
-                if (error) throw error;
+                if (updateError) throw updateError;
 
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (error) {
-                Alert.alert("Upload Failed", "Could not update profile picture.");
-                console.error(error);
+                const message = error instanceof Error ? error.message : "Could not upload image";
+                Alert.alert("Upload Failed", message);
+                console.error("Image Upload Error:", error);
             } finally {
                 setIsUploading(false);
             }

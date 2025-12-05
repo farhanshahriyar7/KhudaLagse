@@ -40,3 +40,6 @@ yarn-error.*
 .vercel
 
 .rork
+
+# Supabase
+supabase.ts
