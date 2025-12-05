@@ -8,6 +8,7 @@ interface User {
   name: string;
   email: string;
   phone: string;
+  image?: string;
 }
 
 export const [AuthContext, useAuth] = createContextHook(() => {
@@ -46,6 +47,7 @@ export const [AuthContext, useAuth] = createContextHook(() => {
       name: supabaseUser.user_metadata?.name || supabaseUser.email?.split("@")[0] || "",
       email: supabaseUser.email || "",
       phone: supabaseUser.user_metadata?.phone || "",
+      image: supabaseUser.user_metadata?.image || "",
     };
   };
 

@@ -161,16 +161,16 @@ export default function InvoiceScreen() {
               
               <div class="info-label">Date</div>
               <div class="info-value">${new Date(order.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}</div>
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}</div>
               
               <div class="info-label">Time</div>
               <div class="info-value">${new Date(order.createdAt).toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}</div>
+      hour: "2-digit",
+      minute: "2-digit",
+    })}</div>
             </div>
 
             <div class="info-block" style="text-align: right;">
@@ -196,8 +196,8 @@ export default function InvoiceScreen() {
             </thead>
             <tbody>
               ${order.items
-                .map(
-                  (item) => `
+        .map(
+          (item) => `
                 <tr>
                   <td class="item-name">${item.name}</td>
                   <td>${item.quantity}</td>
@@ -205,8 +205,8 @@ export default function InvoiceScreen() {
                   <td>৳${item.price * item.quantity}</td>
                 </tr>
               `
-                )
-                .join("")}
+        )
+        .join("")}
             </tbody>
           </table>
 
@@ -228,22 +228,20 @@ export default function InvoiceScreen() {
           <div class="payment-info">
             <div class="info-label">Payment Method</div>
             <div class="info-value">
-              ${
-                order.paymentMethod === "cash"
-                  ? "Cash on Delivery"
-                  : order.paymentMethod === "bkash"
-                  ? "bKash"
-                  : "Nagad"
-              }
+              ${order.paymentMethod === "cash"
+        ? "Cash on Delivery"
+        : order.paymentMethod === "bkash"
+          ? "bKash"
+          : "Nagad"
+      }
             </div>
-            ${
-              order.transactionId
-                ? `
+            ${order.transactionId
+        ? `
               <div class="info-label">Transaction ID</div>
               <div class="info-value">${order.transactionId}</div>
             `
-                : ""
-            }
+        : ""
+      }
           </div>
 
           <div class="footer">
@@ -259,7 +257,7 @@ export default function InvoiceScreen() {
     try {
       setIsGenerating(true);
       const html = generateHTML();
-      
+
       if (Platform.OS === "web") {
         const printWindow = window.open("", "_blank");
         if (printWindow) {
@@ -269,7 +267,7 @@ export default function InvoiceScreen() {
         }
       } else {
         const { uri } = await Print.printToFileAsync({ html });
-        
+
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(uri);
         } else {
@@ -288,12 +286,12 @@ export default function InvoiceScreen() {
     try {
       setIsGenerating(true);
       const html = generateHTML();
-      
+
       if (Platform.OS === "web") {
         Alert.alert("Info", "Share feature is available on mobile devices");
       } else {
         const { uri } = await Print.printToFileAsync({ html });
-        
+
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(uri);
         }
@@ -388,8 +386,8 @@ export default function InvoiceScreen() {
               {order.paymentMethod === "cash"
                 ? "Cash on Delivery"
                 : order.paymentMethod === "bkash"
-                ? "bKash"
-                : "Nagad"}
+                  ? "bKash"
+                  : "Nagad"}
             </Text>
             {order.transactionId && (
               <Text style={styles.detailText}>

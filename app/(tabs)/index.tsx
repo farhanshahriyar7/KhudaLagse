@@ -35,30 +35,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "KhudaLagse",
-          headerTitleStyle: {
-            fontSize: 24,
-            fontWeight: "bold" as const,
-            color: Colors.light.primary,
-          },
-          headerRight: () => (
-            <TouchableOpacity
-              style={styles.cartButton}
-              onPress={() => router.push("/(tabs)/cart" as any)}
-            >
-              <ShoppingCart color={Colors.light.primary} size={24} />
-              {getItemCount() > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{getItemCount()}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          ),
-        }}
-      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.searchContainer}>
@@ -104,7 +80,7 @@ export default function HomeScreen() {
                 style={[
                   styles.categoryCard,
                   selectedCategory === category.name &&
-                    styles.categoryCardActive,
+                  styles.categoryCardActive,
                 ]}
                 onPress={() => setSelectedCategory(category.name)}
               >
@@ -113,7 +89,7 @@ export default function HomeScreen() {
                   style={[
                     styles.categoryName,
                     selectedCategory === category.name &&
-                      styles.categoryNameActive,
+                    styles.categoryNameActive,
                   ]}
                 >
                   {category.name}
@@ -123,7 +99,7 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {selectedCategory === "All" && popularItems.length > 0 && (
+        {selectedCategory === "All" && searchQuery.length === 0 && popularItems.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Popular Items 🔥</Text>
             <ScrollView
@@ -183,6 +159,13 @@ export default function HomeScreen() {
                 </View>
               </TouchableOpacity>
             ))}
+            {filteredItems.length === 0 && searchQuery.length > 0 && (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <Text style={{ color: Colors.light.textSecondary, fontSize: 16 }}>
+                  No items found matching "{searchQuery}"
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
